@@ -216,8 +216,8 @@ select job , round(avg(sal),1) , count(*)  from emp group by job order by job as
 -- 위의 결과에서 job은 직급으로, 급여 평균값은 평균 급여로 , 사원수 조회값은 사원수로 표현하여 조회
 select job as '직급' , round(avg(sal),1) as '급여평균값' , count(*) as '사원수'  from emp group by job order by job asc;
 
-
-
+-- 더블 select
+select * from emp where sal = (select max(sal) from emp);
 
 
 

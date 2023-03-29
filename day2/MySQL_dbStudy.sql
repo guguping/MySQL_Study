@@ -219,5 +219,114 @@ select job as '직급' , round(avg(sal),1) as '급여평균값' , count(*) as '�
 -- 더블 select
 select * from emp where sal = (select max(sal) from emp);
 
+-- 부서별 그룹핑
+select deptno from emp group by deptno;
+select deptno,avg(sal) from emp group by deptno;
+-- 부서별 그룹핑하고 그 안에서 직급별로 그룹핑
+select deptno , job , avg(sal) from emp group by deptno, job;
+select deptno , job , avg(sal) from emp group by job , deptno;
+-- job을 기준으로 오름차순 정렬
+select deptno , job , avg(sal) from emp group by job , deptno order by job asc;
+-- deptno을 기준으로 오름차순 정렬
+select deptno , job , avg(sal) from emp group by job , deptno order by deptno asc;
+
+-- having : 그룹핑한 결과에서 조건 적용 = 그룹핑 했을때만 사용 가능
+-- 부서 , 직급별로 묶고 그 결과에서 평균급여가 2000 이상인 결과만 조회
+select deptno , job , avg(sal) from emp 
+					group by job , deptno 
+						having avg(sal) >= 2000	
+							order by job asc;
+                
+-- 급여가 3000이하인 사원을 대상으로 위의 그룹핑 수행
+select deptno , job , avg(sal) from emp
+					where sal <= 3000
+						group by job , deptno 
+							having avg(sal) >= 2000	
+								order by avg(sal) asc;
+
+-- date 타입을 문자로 표현하기: date_format()
+-- 해당 date의 값만 보는 방법
+select date_format(hiredate,'%Y') from emp;
+
+select * from emp;
+-- 연습문제
+-- 1. 부서별 평균급여, 최고급여, 최저급여, 사원수 조회(평균급여는 소수점 둘째자리에서 반올림)
+select deptno as '부서번호' , round(avg(sal),1) as '평균급여' 
+				, max(sal) as '최고급여' , min(sal) as '최저급여' 
+							, count(deptno) as '사원수' from emp 
+													group by deptno
+														order by deptno asc;
+
+-- 2. 직급별 사원수 조회(단 3명 이상인 결과만 출력)
+select job , count(empno) from emp group by job having count(empno) >= 3;
+
+-- 3. 연도별 입사한 사원수 조회(조회결과 : 연도(yyyy), 사원수)
+select date_format(hiredate , '%Y') as '입사년도' , count(empno) as '사원수' from emp 
+		group by date_format(hiredate , '%Y');
+
+-- 3.1. 위의 결과에서 각 연도별로 부서별 입사한 사원수 조회(조회결과 : 연도(yyyy), 부서번호, 사원수)
+select date_format(hiredate , '%Y') as '입사년도' , deptno , count(empno) as '사원수' from emp 
+		group by date_format(hiredate , '%Y') , deptno;
+
+select * from emp;
+select * from dept;
+
+-- 외부조인
+select * from emp , dept;
+
+-- 조인(내부조인)
+select * from emp , dept where emp.deptno = dept.deptno;
+-- 조인을 하는데 조건으로 emp.deptno 와 dept.deptno가 같은것끼리 출력
+
+-- 컬럼 약어 설정하기
+select *from emp e, dept d where e.deptno = d.deptno;
+-- 각 컬럼의 앞글자로 약어를 설정  이후 약어를 사용하여 deptno가 동일하면 출력
+
+-- deptno을 추가하지 않음
+select empno , ename , dname , loc from  emp e , dept d where e.deptno = d.deptno;
+-- 에러가 발생하지 않음
+-- deptno을 추가함
+select empno , ename , deptno , dname , loc from emp e , dept d where e.deptno = d.deptno;
+-- 에러가 발생함
+select e.empno , e.ename , e.deptno , d.dname , d.loc from emp e , dept d where e.deptno = d.deptno;
+-- (deptno는 두개의 테이블에 공통적으로 가지고 있기 때문에 어떤 컬럼의 정보를 가지고 올지 약어를 붙여 명확하게 해주어야한다)
+
+-- 조인 후 emp 테이블만 조회
+select e.*from emp e, dept d where e.deptno = d.deptno;
+
+-- emp , dept를 조인하여 empno , ename , deptno , dname , loc 조회
+-- (단, 급여가 2500 이상인 사원만 조회하고 , 조회결과는 사원이름 기준으로 오름차순 정렬)
+select e.empno , e.ename , e.deptno , d.dname , d.loc 
+		from emp e, dept d 
+				where e.deptno = d.deptno and e.sal >= 2500
+						order by e.ename asc;
+
+-- 최저급여를 받는 사람이 누구인지?
+select * from emp order by sal asc;
+-- 1.최저급여 값이 얼마인지 조회
+select min(sal) from emp;
+-- 2.최저급여 값을 받는 사람(최저급여 값과 sal 값이 일치하는)이 누구인지 조회
+select * from emp where sal=800;
+-- 서브 쿼리 적용
+select * from emp where sal=(select min(sal) from emp);
+
+
+-- 최고 급여를 받는 사원 정보 조회
+select * from emp where sal = (select max(sal) from emp);
+-- allen 보다 높은 급여를 받는 사원 조회
+select * from emp where sal > (select sal from emp where ename = 'allen');
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

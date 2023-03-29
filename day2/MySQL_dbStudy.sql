@@ -326,6 +326,105 @@ select * from emp e , dept d
 			where e.deptno = 20 and d.deptno = 20 
 				and sal > (select avg(sal) from emp);
 
+create table member1(
+	id bigint,
+    member_email varchar(20),
+    member_password varchar(10)
+);
+
+insert into member1(id,member_email , member_password) 
+		values(1,'member1@email.com' , '1111');
+
+-- 모든 컬럼에 데이터를 저장한다면 컬럼이름 생략 가능
+insert into member1 values(1,'member1@email.com' , '1111');
+-- 컬럼 이름을 생략하고 모든 컬럼에 데이터를 저장한다면?
+insert into member1 values(1,'member1@email.com'); -- X 오류 발생
+-- 특정 컬럼에만 값을 넣고 싶은 경우
+insert into member1(id , member_email) values(3,'member2@email.com');
+-- 테이블 만들 때 지정한 크기보다 큰 값을 저장할 때
+insert into member1 values(2,'member3@email.com','22222222222'); -- X에러 코드 발생
+-- NULL로 저장도 가능하다
+insert into member1 values(1,'member1@email.com',null);
+
+select * from member1;
+
+-- id 컬럼에 not null 제약조건 적용
+create table member2(
+	id bigint not null,
+    member_email varchar(20),
+    member_password varchar(10)
+);
+desc member2;
+insert into member2(id , member_email) values(null,'member2@email.com');
+-- error 1048
+
+select * from member2;
+
+-- not null & unique 사용
+create table member3(
+	id bigint not null unique,
+    member_email varchar(20),
+    member_password varchar(10)
+);
+desc member3;
+select * from member3;
+
+insert into member3(id , member_email) values(1,'member2@email.com');
+-- error 1062 발생
+insert into member3(id , member_email) values(3,'member2@email.com');
+-- id가 다르므로 error X
+
+create table member4(
+	id bigint not null unique,
+    member_email varchar(20) not null unique,
+    member_password varchar(10) not null unique
+);
+desc member4;
+select * from member4;
+
+insert into member4(id , member_email , member_password) values(1,'member2@email.com', '1111');
+-- id , email , password에 다 not null , unique를 걸었기에 값이 있어야하고 중복도 안됀다
+
+create table member5(
+	id bigint not null unique,
+    member_email varchar(20) not null unique,
+    member_password varchar(10) not null,
+    member_created_date datetime default now()
+);
+desc member5;
+select * from member5;
+
+insert into member5(id , member_email , member_password)
+		values(1,'member1@email.com','1111');
+
+-- primary key 사용
+create table member6(
+	id bigint primary key,
+    member_email varchar(20) not null unique,
+    member_password varchar(10) not null,
+    member_created_date datetime default now()
+);
+desc member6;
+select * from member6;
+
+insert into member6(id , member_email , member_password)values(2,'member2@email.com','1112');
+
+create table member7(
+	id bigint,
+    member_email varchar(20) not null unique,
+    member_password varchar(10) not null,
+    member_created_date datetime default now(),
+    constraint pk_member7 primary key(id)
+);
+desc member7;
+select * from member7;
+
+-- 제약조건 확인
+select * from information_schema.table_constraints;
+
+
+
+
 
 
 

@@ -248,6 +248,9 @@ select deptno , job , avg(sal) from emp
 -- 해당 date의 값만 보는 방법
 select date_format(hiredate,'%Y') from emp;
 
+
+-- 20230329 - day 3
+
 select * from emp;
 -- 연습문제
 -- 1. 부서별 평균급여, 최고급여, 최저급여, 사원수 조회(평균급여는 소수점 둘째자리에서 반올림)
@@ -422,16 +425,198 @@ select * from member7;
 -- 제약조건 확인
 select * from information_schema.table_constraints;
 
+-- 20230330 - day 4
+
+-- 삭제 : 그냥 삭제
+drop table board1; 
+-- 안전 삭제 : 있으면 지우고 없으면 말고
+drop table if exists board1; 
+-- 이걸 쓰는 이유는 오류가 있으면 코드실행이 그자리에서 멈춘다
+-- 하지만 if exists를 쓰면 멈추지 않고 경고문을 띄우고 계속 실행한다
+
+-- 게시판 테이블
+drop table if exists board1; 
+create table board1(
+id bigint, -- 글번호
+board_writer varchar(20) not null, -- 작성자
+board_contents varchar(500), -- 내용
+constraint pk_board1 primary key(id)
+);
+desc board1;
+select * from board1;
+
+-- 댓글 테이블 : 댓글은 조제하는 게시글에만 작성 가능하며,
+-- 게시글의 글번호(id)를 참조하는 관계로 정의
+drop table if exists comment1;
+create table comment1(
+	id bigint , -- 댓글 번호
+	comment_writer varchar(20) not null, -- 댓글 작성자
+	comment_contents varchar(200), -- 댓글 내용
+	board1_id bigint, -- 어떤 게시글에 작성된 댓글인지 글번호 정보가 필요함
+    -- 댓글테이블(comment1)의 pk 지정
+	constraint pk_comment1 primary key(id),
+    -- 참조관계 지정을 위해 comment1 테이블의 board1_id 컬럼을
+    -- board1 테이블의 id 컬럼을 참조하는 관계로 지정
+	constraint fk_comment1 foreign key(board1_id) references board1(id)
+);
+
+-- 1번게시글
+insert into board1(id,board_writer , board_contents)
+	values(1,'writer1' , 'contents1');
+-- 2번게시글
+insert into board1(id,board_writer , board_contents)
+	values(2,'writer2' , 'contents2');
+-- 3번게시글
+insert into board1(id,board_writer , board_contents)
+	values(3,'writer3' , 'contents3');
+-- 4번게시글
+insert into board1(id,board_writer , board_contents)
+	values(4,'writer4' , 'contents4');
+select * from board1;
+-- 댓글 데이터 저장
+-- 1번 게시글에 대한 1번 댓글
+insert into comment1(id, comment_writer , comment_contents,board1_id)
+	values (1,'c writer1' , 'c contents1',1);
+-- 1번 게시글에 대한 2번 댓글
+insert into comment1(id, comment_writer , comment_contents,board1_id)
+	values (2,'c writer2' , 'c contents1',1);
+-- 2번 게시글에 대한 댓글
+insert into comment1(id, comment_writer , comment_contents,board1_id)
+	values (3,'c writer3' , 'c contents1',2);
+-- 5번 게시글에 대한 댓글
+insert into comment1(id, comment_writer , comment_contents,board1_id)
+	values (4,'c writer3' , 'c contents1',5);
+    
+-- 부모 데이터 삭제
+-- 1,2번게시글에는 댓글이 있고 , 3,4번 게시글에는 댓글이 없음
+-- 3번 게시글 삭제
+delete from board1 where id =3;
+-- 삭제를 할때는 꼭 해당 테이블의 고유한 pk를 가지고 삭제를 한다
+-- 2번 게시글 삭제
+delete from board1 where id =2; 
+-- comment board1_id가 board1에 있는 id컬럼을 참조하고 있기 때문에 삭제 불가
+-- 2번 게시글에 작성된 댓글 삭제 (댓글번호 3) 후 2번 게시글 삭제
+delete from comment1 where id =3;
+delete from board1 where id =2;
 
 
+-- 게시판 테이블
+drop table if exists board2; 
+create table board2(
+id bigint, -- 글번호
+board_writer varchar(20) not null, -- 작성자
+board_contents varchar(500), -- 내용
+constraint pk_board2 primary key(id)
+);
+desc board2;
+select * from board2;
+
+-- 댓글 테이블
+drop table if exists comment2;
+create table comment2(
+	id bigint , -- 댓글 번호
+	comment_writer varchar(20) not null, -- 댓글 작성자
+	comment_contents varchar(200), -- 댓글 내용
+	board2_id bigint, -- 어떤 게시글에 작성된 댓글인지 글번호 정보가 필요함
+	constraint pk_comment2 primary key(id),
+	constraint fk_comment2 foreign key(board2_id) references board2(id) on delete cascade
+);
+desc comment2;
+select *from comment2;
+
+-- 게시글 4개 작성
+insert into board2(id , board_writer , board_contents)
+	values(1,'writer1' , 'contents1');
+insert into board2(id , board_writer , board_contents)
+	values(2,'writer2' ,' contents2');
+insert into board2(id , board_writer , board_contents)
+	values(3,'writer3' , 'contents3');
+insert into board2(id , board_writer , board_contents)
+	values(4,'writer4' , 'contents4');
+select * from board2;
+-- 1,2번 게시글에 댓글 작성
+insert into comment2( id , comment_writer , comment_contents , board2_id)
+	values(1,'c writer1' , 'c comment1' , 1);
+insert into comment2( id , comment_writer , comment_contents , board2_id)
+	values(2,'c writer1' , 'c comment1' , 2);
+select * from comment2;
+-- 3번게시글 삭제
+delete from board2 where id = 3;
+-- 2번 게시글 삭제
+delete from board2 where id = 2;
 
 
+-- 게시판 테이블
+drop table if exists board3; 
+create table board3(
+id bigint, -- 글번호
+board_writer varchar(20) not null, -- 작성자
+board_contents varchar(500), -- 내용
+constraint pk_board3 primary key(id)
+);
+desc board3;
+select * from board3;
+
+-- 댓글 테이블
+drop table if exists comment3;
+create table comment3(
+	id bigint , -- 댓글 번호
+	comment_writer varchar(20) not null, -- 댓글 작성자
+	comment_contents varchar(200), -- 댓글 내용
+	board3_id bigint, -- 어떤 게시글에 작성된 댓글인지 글번호 정보가 필요함
+	constraint pk_comment3 primary key(id),
+	constraint fk_comment3 foreign key(board3_id) references board3(id) on delete set null
+);
+desc comment3;
+select *from comment3;
 
 
+select * from board3;
+insert into board3(id , board_writer , board_contents)
+	values(1,'writer1' , 'contents1');
+insert into board3(id , board_writer , board_contents)
+	values(2,'writer2' ,' contents2');
+insert into board3(id , board_writer , board_contents)
+	values(3,'writer3' , 'contents3');
+insert into board3(id , board_writer , board_contents)
+	values(4,'writer4' , 'contents4');
 
 
+select *from comment3;
+insert into comment3( id , comment_writer , comment_contents , board3_id)
+	values(1,'c writer1' , 'c comment1' , 1);
+insert into comment3( id , comment_writer , comment_contents , board3_id)
+	values(2,'c writer1' , 'c comment1' , 2);
+insert into comment3( id , comment_writer , comment_contents , board3_id)
+	values(3,'c writer1' , 'c comment1' , 1);
 
+-- 3번게시글 삭제
+delete from board3 where id = 3;
+-- 2번 게시글 삭제
+delete from board3 where id = 2;
 
+-- 수정 쿼리
+-- 1번 게시글 내용을 안녕하세요로 수정
+select * from board3;
+update board3 set board_contents = '안녕하세요' where id = 1;
+-- 4번 게시글 작성자를 작성자4, 내용을 곧 점심시간으로 수정
+update board3 set board_writer = '작성자' , board_contents = '곧 점심시간' where id = 4;
+-- 컬럼의 2가지 이상 정보를 수정할때는 , 로 연결해준다
 
+-- id 컬럼에 자동 번호 적용하기
+drop table if exists board4; 
+create table board4(
+	id bigint auto_increment, -- 글번호
+	board_writer varchar(20) not null, -- 작성자
+	board_contents varchar(500), -- 내용
+	constraint pk_board4 primary key(id)
+);
+desc board4;
+select * from board4;
 
+insert into board4( board_writer , board_contents)
+	values('writer1' , 'contents1');
+insert into board4( board_writer , board_contents)
+	values('writer2' , 'contents2');
 
+    

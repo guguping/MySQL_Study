@@ -619,4 +619,156 @@ insert into board4( board_writer , board_contents)
 insert into board4( board_writer , board_contents)
 	values('writer2' , 'contents2');
 
-    
+use db_dbclass;
+drop table if exists book;
+create table book(
+id bigint auto_increment,
+b_bookname varchar(20),
+b_publisher varchar(20),
+b_price bigint,
+constraint pk_book primary key(id)
+);
+desc book;
+select *from book;
+
+insert into book(b_bookname , b_publisher , b_price)
+			values('축구의 역사' , '굿스포츠' ,7000);
+insert into book(b_bookname , b_publisher , b_price)
+			values('축구스카우팅 리포트' , '나무수' ,13000);
+insert into book(b_bookname , b_publisher , b_price)
+			values('축구의 이해' , '대한미디어' ,22000);
+insert into book(b_bookname , b_publisher , b_price)
+			values('배구 바이블' , '대한미디어' ,35000);
+insert into book(b_bookname , b_publisher , b_price)
+			values('피겨 교본' , '굿스포츠' ,8000);
+insert into book(b_bookname , b_publisher , b_price)
+			values('피칭 단계별기술' , '굿스포츠' ,6000);
+insert into book(b_bookname , b_publisher , b_price)
+			values('야구의 추억' , '이상미디어' ,20000);
+insert into book(b_bookname , b_publisher , b_price)
+			values('야구를 부탁해' , '이상미디어' ,13000);
+insert into book(b_bookname , b_publisher , b_price)
+			values('올림픽 이야기' , '삼성당' ,7500);
+insert into book(b_bookname , b_publisher , b_price)
+			values('olympic champions' , 'pearson' ,13000);
+
+drop table if exists customer;
+create table customer(
+id bigint auto_increment,
+c_name varchar(20),
+c_address varchar(20),
+c_phone varchar(20),
+-- book_id bigint,
+constraint pk_customer primary key(id)
+-- constraint fk_customer foreign key(book_id) references book(id)
+);
+desc customer;
+select *from customer;
+
+insert into customer(c_name , c_address , c_phone)
+		values('손흥민','영국 런던','000-5000-0001');
+insert into customer(c_name , c_address , c_phone)
+		values('김연아','대한민국 서울','000-6000-0001');
+insert into customer(c_name , c_address , c_phone)
+		values('김연경','중국 상하이','000-7000-0001');
+insert into customer(c_name , c_address , c_phone)
+		values('류현진','캐나다 토론토','000-8000-0001');
+insert into customer(c_name , c_address)
+		values('이강인','스페인 마요르카');
+
+drop table if exists orders;
+create table orders(
+id bigint auto_increment,
+customer_id bigint,
+book_id bigint,
+o_saleprice bigint,
+o_orderdate date,
+constraint pk_orders primary key(id),
+constraint fk_orders1 foreign key(book_id) references book(id),
+constraint fk_orders2 foreign key(customer_id) references customer(id)
+);
+desc orders;
+select * from orders;
+insert into orders(customer_id , book_id , o_saleprice , o_orderdate)
+		values(1,1,6000,'2021-07-01');
+insert into orders(customer_id , book_id ,o_saleprice , o_orderdate)
+		values(1,3,21000,'2021-07-03');
+insert into orders(customer_id , book_id ,o_saleprice , o_orderdate)
+		values(2,5,8000,'2021-07-03');
+insert into orders(customer_id , book_id ,o_saleprice , o_orderdate)
+		values(3,6,6000,'2021-07-04');
+insert into orders(customer_id , book_id ,o_saleprice , o_orderdate)
+		values(4,7,20000,'2021-07-05');
+insert into orders(customer_id , book_id ,o_saleprice , o_orderdate)
+		values(1,2,12000,'2021-07-07');
+insert into orders(customer_id , book_id ,o_saleprice , o_orderdate)
+		values(4,8,13000,'2021-07-07');
+insert into orders(customer_id , book_id ,o_saleprice , o_orderdate)
+		values(3,10,12000,'2021-07-08');
+insert into orders(customer_id , book_id ,o_saleprice , o_orderdate)
+		values(2,10,7000,'2021-07-09');
+insert into orders(customer_id , book_id ,o_saleprice , o_orderdate)
+		values(3,8,13000,'2021-07-10');
+        
+        
+-- 1. 모든 도서의 가격과 도서명 조회 
+select b_bookname , b_price from book;
+-- 2. 모든 출판사 이름 조회 
+select b_publisher from book;
+-- 2.1 중복값을 제외한 출판사 이름 조회 
+select b_publisher from book group by b_publisher;
+-- 3. BOOK테이블의 모든 내용 조회 
+select * from book;
+-- 4. 20000원 미만의 도서만 조회 
+select *from book where b_price < 20000;
+-- 5. 10000원 이상 20000원 이하인 도서만 조회
+select * from book where b_price >= 10000 and b_price <= 20000;
+select * from book where b_price between 10000 and 20000;
+-- 6. 출판사가 굿스포츠 또는 대한미디어인 도서 조회 
+select * from book where b_publisher = '굿스포츠' or b_publisher = '대한미디어';
+select * from book where b_publisher in ('굿스포츠' , '대한미디어');
+-- 7. 도서명에 축구가 포함된 모든 도서를 조회
+select * from book where b_bookname like '%축구%';
+-- 8. 도서명의 두번째 글자가 구인 도서 조회
+select * from book where b_bookname like '_구%';
+-- 9. 축구 관련 도서 중 가격이 20000원 이상인 도서 조회
+select * from book where b_bookname like '%축구%' and b_price >= 20000;
+-- 10. 책 이름순으로 전체 도서 조회
+select * from book order by b_bookname asc;
+-- 11. 도서를 가격이 낮은 것 부터 조회하고 같은 가격일 경우 도서명을 가나다 순으로 조회
+select * from book order by b_price asc , b_bookname asc;
+select * from book order by b_price , b_bookname asc;
+
+
+select * from orders;
+-- 12. 주문 도서의 총 판매액 조회
+select sum(o_saleprice) from orders;
+-- 13. 1번 고객이 주문한 도서 총 판매액 조회 
+select sum(o_saleprice) from orders where id = 1;
+-- 14. ORDERS 테이블로 부터 평균판매가, 최고판매가, 최저판매가 조회 
+select avg(o_saleprice) as '평균판매가',max(o_saleprice) as '최고판매가', min(o_saleprice) as '최저판매가' from orders;
+-- 15. 고객별로 주문한 도서의 총 수량과 총 판매액 조회
+select customer_id , count(book_id) , sum(o_saleprice) from orders group by customer_id;
+-- 16. 가격이 8,000원 이상인 도서를 구매한 고객에 대해 고객별 주문 도서의 총 수량 조회 (GROUP BY 활용)
+--    (단, 8,000원 이상 도서 두 권 이상 구매한 고객만) 
+select customer_id , count(book_id) from orders where o_saleprice >= 8000 group by customer_id having count(book_id) >= 2;
+-- 17. 김연아고객(고객번호 : 2) 총 구매액
+select customer_id , sum(o_saleprice) from orders where customer_id = 2 group by customer_id;
+-- 18. 김연아 고객이 구매한 도서의 수
+select customer_id , count(book_id) from orders where customer_id = 2;
+-- 19. 서점에 있는 도서의 총 권수
+select *from book;
+select count(id) from book;
+-- 20. 출판사의 총 수 
+select count(distinct b_publisher) from book;
+-- 21. 7월 4일 ~ 7일 사이에 주문한 도서의 주문번호 조회 
+select *from orders;
+select id from orders where o_orderdate  >= '2021-07-04' and o_orderdate <= '2021-07-07';
+-- 22. 7월 4일 ~ 7일 사이에 주문하지 않은 도서의 주문번호 조회
+select id from orders where !(o_orderdate >= '2021-07-04' and o_orderdate <= '2021-07-07');
+
+
+
+
+
+

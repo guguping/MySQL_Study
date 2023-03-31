@@ -740,34 +740,104 @@ select * from book order by b_price asc , b_bookname asc;
 select * from book order by b_price , b_bookname asc;
 
 
+-- 20230331 day5
 select * from orders;
 -- 12. 주문 도서의 총 판매액 조회
 select sum(o_saleprice) from orders;
 -- 13. 1번 고객이 주문한 도서 총 판매액 조회 
-select sum(o_saleprice) from orders where id = 1;
+select sum(o_saleprice) from orders where id = 1; -- X
+select sum(o_saleprice) from orders where customer_id = 1; -- O
 -- 14. ORDERS 테이블로 부터 평균판매가, 최고판매가, 최저판매가 조회 
 select avg(o_saleprice) as '평균판매가',max(o_saleprice) as '최고판매가', min(o_saleprice) as '최저판매가' from orders;
 -- 15. 고객별로 주문한 도서의 총 수량과 총 판매액 조회
 select customer_id , count(book_id) , sum(o_saleprice) from orders group by customer_id;
 -- 16. 가격이 8,000원 이상인 도서를 구매한 고객에 대해 고객별 주문 도서의 총 수량 조회 (GROUP BY 활용)
 --    (단, 8,000원 이상 도서 두 권 이상 구매한 고객만) 
-select customer_id , count(book_id) from orders where o_saleprice >= 8000 group by customer_id having count(book_id) >= 2;
+select customer_id , count(id) from orders where o_saleprice >= 8000
+		group by customer_id having count(id) >= 2;
 -- 17. 김연아고객(고객번호 : 2) 총 구매액
-select customer_id , sum(o_saleprice) from orders where customer_id = 2 group by customer_id;
+select customer_id , sum(o_saleprice) from orders where customer_id = 2 group by customer_id; -- X
+select sum(o_saleprice) from orders where customer_id = 2; -- O
 -- 18. 김연아 고객이 구매한 도서의 수
-select customer_id , count(book_id) from orders where customer_id = 2;
+select count(book_id) from orders where customer_id = 2;
 -- 19. 서점에 있는 도서의 총 권수
-select *from book;
 select count(id) from book;
 -- 20. 출판사의 총 수 
 select count(distinct b_publisher) from book;
+-- distinct 절 : 중복결과 제외
 -- 21. 7월 4일 ~ 7일 사이에 주문한 도서의 주문번호 조회 
-select *from orders;
-select id from orders where o_orderdate  >= '2021-07-04' and o_orderdate <= '2021-07-07';
+select * from orders where o_orderdate  >= '2021-07-04' and o_orderdate <= '2021-07-07';
+select * from orders where o_orderdate between str_to_date('2021-07-04' , '%Y-%m-%d')
+										and str_to_date('2021-07-07' , '%Y-%m-%d');
 -- 22. 7월 4일 ~ 7일 사이에 주문하지 않은 도서의 주문번호 조회
-select id from orders where !(o_orderdate >= '2021-07-04' and o_orderdate <= '2021-07-07');
+select * from orders where !(o_orderdate >= '2021-07-04' and o_orderdate <= '2021-07-07');
+select * from orders where o_orderdate not between str_to_date('2021-07-04' , '%Y-%m-%d')
+										and str_to_date('2021-07-07' , '%Y-%m-%d');
 
 
+-- 23. 고객, 주문 테이블 조인하여 고객번호 순으로 정렬
+select * from customer c , orders o 
+		where o.customer_id = c.id 
+			order by c.id asc;
+
+select * from customer c 
+		inner join orders o 
+			on c.id = o.customer_id;
+                        
+-- 24. 고객이름(CUSTOMER), 고객이 주문한 도서 가격(ORDERS) 조회 
+select c.c_name,o.o_saleprice from customer c , orders o 
+		where o.customer_id = c.id;
+-- 25. 고객별(GROUP)로 주문한 도서의 총 판매액(SUM)과 고객이름을 조회하고 조회 결과를 가나다 순으로 정렬 
+select c.c_name , sum(o.o_saleprice) 
+	from customer c , orders o 
+		where o.customer_id = c.id 
+			group by c.c_name
+				order by c.c_name asc;
+                
+-- 26. 고객명과 고객이 주문한 도서명을 조회(3테이블 조인)
+select c.c_name , b.b_bookname 
+	from customer c , orders o , book b 
+		where o.customer_id = c.id 
+			and o.book_id = b.id;
+-- 27. 2만원(SALEPRICE) 이상 도서를 주문한 고객의 이름과 도서명을 조회 
+select c.c_name , b.b_bookname 
+	from customer c , orders o , book b 
+		where o.customer_id = c.id 
+			and o.book_id = b.id 
+				and b.b_price >=20000;
+-- 28. 손흥민 고객의 총 구매액과 고객명을 함께 조회
+select c.c_name , sum(o.o_saleprice) from customer c , orders o , book b 
+		where o.customer_id = c.id 
+				and c.c_name = '손흥민';
+-- 29. 손흥민 고객의 총 구매수량과 고객명을 함께 조회
+select c.c_name , count(customer_id) from customer c , orders o 
+		where o.customer_id = c.id 
+				and c.c_name = '손흥민';
+-- 30. 가장 비싼 도서의 이름을 조회 
+select b_bookname from book 
+		where b_price=(select max(b_price) from book);
+-- 31. 책을 구매한 이력이 있는 고객의 이름을 조회
+select c_name from customer c , orders o 
+		where c.id = o.customer_id 
+			group by c_name;
+-- 32. 도서의 가격(PRICE)과 판매가격(SALEPRICE)의 차이가 가장 많이 나는 주문 조회 
+select o.* from orders o , book b 
+		where o.o_saleprice = (select max(b_price - o_saleprice) from orders) 
+			and o.book_id = b.id;
+-- 33. 고객별 평균 구매 금액이 도서의 판매 평균 금액 보다 높은 고객의 이름 조회
+select c.c_name from orders o , customer c 
+		where o.customer_id = c.id 
+			group by c.id 
+				having avg(o_saleprice) > (select avg(o_saleprice) from orders);
+-- 34. 고객번호가 5인 고객의 주소를 대한민국 인천으로 변경
+
+update customer set c_address = '대한민국 인천' where id = 5;
+-- 35. 김씨 성을 가진 고객이 주문한 총 판매액 조회
+select c.c_name , sum(o_saleprice) from orders o , customer c 
+				where o.customer_id = c.id 
+					group by c.id 
+						having c_name like '김%' 
+							and (select sum(o_saleprice) from orders);
 
 
 

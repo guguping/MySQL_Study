@@ -818,26 +818,143 @@ select b_bookname from book
 		where b_price=(select max(b_price) from book);
 -- 31. 책을 구매한 이력이 있는 고객의 이름을 조회
 select c_name from customer c , orders o 
-		where c.id = o.customer_id 
+		where c.id = o.customer_id
 			group by c_name;
+            
+select customer_id from orders where id in (1,2,3,4);
+select c_name from customer 
+	where id in(select customer_id from orders);
 -- 32. 도서의 가격(PRICE)과 판매가격(SALEPRICE)의 차이가 가장 많이 나는 주문 조회 
-select o.* from orders o , book b 
-		where o.o_saleprice = (select max(b_price - o_saleprice) from orders) 
+select * from book b , orders o  
+		where o.o_saleprice = (select max(b_price-o_saleprice) from orders) 
 			and o.book_id = b.id;
+            
+select * from book b , orders o where b.id=o.book_id
+			and b.b_price - o.o_saleprice =
+				(select max(b.b_price - o.o_saleprice) from book b, orders o
+					where b.id = o.book_id);
 -- 33. 고객별 평균 구매 금액이 도서의 판매 평균 금액 보다 높은 고객의 이름 조회
 select c.c_name from orders o , customer c 
 		where o.customer_id = c.id 
-			group by c.id 
-				having avg(o_saleprice) > (select avg(o_saleprice) from orders);
+			group by c.c_name 
+				having avg(o_saleprice) >= (select avg(o_saleprice) from orders);
 -- 34. 고객번호가 5인 고객의 주소를 대한민국 인천으로 변경
-
 update customer set c_address = '대한민국 인천' where id = 5;
--- 35. 김씨 성을 가진 고객이 주문한 총 판매액 조회
+-- 35. 김씨 성을 가진 고객이 주문한 총 판매액 조회                            
+select sum(o_saleprice) from orders where customer_id 
+		in(select id from customer where c_name like '김%');
+
 select c.c_name , sum(o_saleprice) from orders o , customer c 
 				where o.customer_id = c.id 
 					group by c.id 
 						having c_name like '김%' 
 							and (select sum(o_saleprice) from orders);
+
+
+-- 테이블 구조 변경 (alter)
+create table student(
+	id bigint,
+    s_name varchar(20),
+    s_mobile int
+);
+desc student;
+-- 기존 컬럼에 제약조건 추가
+alter table student add constraint primary key(id);
+-- 기존 컬럼 타입 변경
+alter table student modify s_mobile varchar(30);
+-- 새로운 컬럼 추가
+alter table student add s_major varchar(30);
+-- 컬럼 이름 변경
+alter table student change s_mobile s_phone varchar(30);
+-- 컬럼 삭제
+alter table student drop s_major;
+
+drop table if exists board_table;
+create table board_table(
+	id bigint auto_increment primary key,
+	board_title varchar(50) not null,
+	board_writer varchar(20) not null,
+	board_contents varchar(500),
+	board_hits int,
+	board_created_time datetime default now(),
+	board_update_time datetime on update now(),
+	-- 업데이트가 발생 했을 때 , 현재시간을 기록해라
+	board_file_attached int default 0, 
+	-- 파일 첨부 여부 (없으면 0 , 있으면 1)
+	member_id bigint,
+	category_id bigint,
+	constraint fk_member_table foreign key(member_id) 
+				references member_table(id)on delete cascade,
+	constraint fk_category_table foreign key(category_id) 
+				references category_table(id)on delete set null
+);
+
+drop table if exists board_file_table;
+create table board_file_table(
+	id bigint auto_increment primary key,
+	original_file_name varchar(100),
+    -- 사용자가 업로드한 파일의 이름
+	stored_file_name varchar(100),
+    -- 관리용 파일 이름(파일이름 생성 로직은 backend에서)
+	board_id bigint,
+	constraint fk_board_table foreign key(board_id) 
+				references board_table(id)on delete cascade
+);
+-- 실제 파일을 db에 저장하지는 않음
+-- 대신 파일의 이름은 db에 저장한다
+
+drop table if exists category_table;
+create table category_table(
+	id bigint auto_increment,
+	category_name varchar(20) not null unique,
+	constraint pk_create_table primary key(id)
+);
+
+drop table if exists comment_table;
+create table comment_table(
+	id bigint auto_increment primary key,
+	comment_writer varchar(20)not null,
+	comment_contents varchar(200)not null,
+	comment_created_time datetime default now(),
+	board_id bigint,
+	member_id bigint,
+	constraint fk_comment_board_talbe foreign key(board_id) 
+				references board_table(id) on delete cascade,
+	constraint fk_comment_member_tabe foreign key(member_id) 
+				references member_table(id)on delete cascade
+);
+
+drop table if exists member_table;
+create table member_table(
+	id bigint auto_increment,
+	member_email varchar(50) not null unique,
+	member_name varchar(20) not null unique,
+	member_password varchar(20) not null,
+	constraint pk_member_table primary key(id)
+);
+
+drop table if exists good_table;
+create table good_table(
+	id bigint auto_increment primary key,
+	comment_id bigint,
+	member_id bigint,
+	constraint fk_good_comment foreign key(comment_id) 
+				references comment_table(id),
+	constraint fk_good_member foreign key(member_id) 
+				references member_table(id)on delete cascade
+);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

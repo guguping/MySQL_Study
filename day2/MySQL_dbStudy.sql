@@ -968,3 +968,67 @@ update member_table set member_password = '9999' where di = 5; -- 업데이트
 -- 8. 회원 삭제 또는 탈퇴 
 delete from member_table where id = 5;
 
+-- 게시글 카테고리 
+select * from category_table;
+select * from board_table;
+select * from member_table;
+select * from board_file_table;
+-- 게시판 카테고리는 자유게시판, 공지사항, 가입인사 세가지가 있음.
+insert into category_table ( category_name )
+		value ('free_table');
+insert into category_table ( category_name )
+		value ('g_table');
+insert into category_table ( category_name )
+		value ('hello_table');
+-- 게시판 기능 
+-- 1. 게시글 작성(파일첨부 x) 3개 이상 
+insert into board_table(board_title , board_writer , board_contents , member_id , category_id)
+		values('달달한초코칩' , '오뚜기' , '제곧내' , 5 , 1);
+insert into board_table(board_title , board_writer , board_contents , member_id , category_id)
+		values('쓴맛카카오' , '타우린' , '제곧내' , 7 , 1);
+insert into board_table(board_title , board_writer , board_contents , member_id , category_id)
+		values('세상에맙소사' , '핫식스' , '제곧내' , 1 , 1);
+-- 1번 회원이 자유게시판 글 2개, 공지사항 글 1개 작성 
+insert into board_table(board_title , board_writer , board_contents , member_id , category_id)
+		values('내맘에안들면벤' , '핫식스' , '제곧내' , 1 , 3);
+insert into board_table(board_title , board_writer , board_contents , member_id , category_id)
+		values('내가바로' , '핫식스' , '제곧내' , 1 , 1);
+insert into board_table(board_title , board_writer , board_contents , member_id , category_id)
+		values('킹왕짱' , '핫식스' , '제곧내' , 1 , 1);
+-- 2번 회원이 자유게시판 글 3개 작성
+insert into board_table(board_title , board_writer , board_contents , member_id , category_id)
+		values('얍' , '오뚜기' , '제곧내' , 5 , 1);
+insert into board_table(board_title , board_writer , board_contents , member_id , category_id)
+		values('엽' , '오뚜기' , '제곧내' , 5 , 1);
+insert into board_table(board_title , board_writer , board_contents , member_id , category_id)
+		values('욥' , '오뚜기' , '제곧내' , 5 , 1);
+-- 3번 회원이 가입인사 글 1개 작성 
+insert into board_table(board_title , board_writer , board_contents , member_id , category_id)
+		values('안녕하세요' , '타우린' , '제곧내' , 7 , 2);
+-- 1.1. 게시글 작성(파일첨부 o)
+insert into board_file_table ( original_file_name , stored_file_name , board_id)
+		values('흠냐륑' , '77744477흠냐륑' , 1);
+insert into board_table(board_title , board_writer , board_contents , member_id , category_id , board_file_attached)
+		values('흠냐륑' , '핫식스' , '제곧내' , 1 , 3 , 1);
+-- 2번 회원이 파일있는 자유게시판 글 2개 작성
+insert into board_file_table ( original_file_name , stored_file_name , board_id)
+		values('륑냐흠' , '45747444릥냐흠' , 7);
+insert into board_table(board_title , board_writer , board_contents , member_id , category_id , board_file_attached)
+		values('륑냐흠' , '타우린' , '제곧내' , 7 , 1 , 5);
+insert into board_file_table ( original_file_name , stored_file_name , board_id)
+		values('얍엽욥' , '45747444얍' , 7);
+insert into board_table(board_title , board_writer , board_contents , member_id , category_id , board_file_attached)
+		values('얍엽욥' , '타우린' , '제곧내' , 7 , 1 , 5);
+-- 2. 게시글 목록 조회 
+select *from category_table;
+-- 2.1 전체글 목록 조회
+select *from board_table;
+-- 2.2 자유게시판 목록 조회 
+select * from board_table where category_id = 1;
+-- 2.3 공지사항 목록 조회 
+select * from board_table where category_id = 3;
+-- 2.4 목록 조회시 카테고리 이름도 함께 나오게 조회
+select * from board_file_table;
+select b.* , c.category_name
+		from board_table b , category_table c
+			where b.category_id = c.id order by b.id asc;

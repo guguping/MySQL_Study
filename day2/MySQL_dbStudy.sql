@@ -1066,17 +1066,48 @@ select * from board_table order by id desc limit 0,3;
 select * from board_table order by id desc limit 3,3;
 -- 7.3. 세번째 페이지 
 select * from board_table order by id desc limit 6,3;
+-- 정렬기준은 조회수 , 한페이지당 글 5개씩 볼 때 1페이지
+select * from board_table order by board_hits desc limit 0,5;
 -- 8. 검색(글제목 기준)
 select * from board_table where board_title = '흠냐륑';
 -- 8.1 검색결과를 오래된 순으로 조회 
-select * from board_table order by board_created_time asc;
+select * from board_table where board_contents like '%제%' order by board_created_time asc;
 -- 8.2 검색결과를 조회수 내림차순으로 조회 
-select * from board_table order by board_hits desc;
+select * from board_table where board_writer like '%타%' order by board_hits desc;
 -- 8.3 검색결과 페이징 처리 
-select * from board_table where board_contents = '제곧내' order by board_created_time desc limit 0,3;
+select * from board_table 
+	where board_title like '%안녕%' 
+		order by board_created_time 
+			desc limit 0,2;
 
-
-
+-- 댓글 기능 
+-- 1. 댓글 작성 
+-- 1.1. 1번 회원이 1번 게시글에 댓글 작성 
+insert into comment_table(comment_writer , comment_contents , member_id , board_id)
+		values ('잠자는 숲속의 하마' , '개노잼' , 1 , 2);
+-- 1.2. 2번 회원이 1번 게시글에 댓글 작성 
+insert into comment_table(comment_writer , comment_contents , member_id , board_id)
+		values('랩퍼송대관' , 'ㅇㅈㅇㅈ' , 5 , 2);
+-- 2. 댓글 조회
+select * from comment_table where board_id = 2;
+select * from board_table where id = 2 ;
+select * from board_table b , comment_table c where b.id=c.board_id;
+-- 3. 댓글 좋아요 
+-- 3.1. 1번 회원이 2번 회원이 작성한 댓글에 좋아요 클릭
+-- 좋아요 하기 전 체크
+select id from good_table where comment_id=2 and member_id =1;
+-- 좋아요 한적이 없다면 좋아요
+insert into good_table(comment_id , member_id)
+		values(2 , 1);
+-- 좋아요 한적이 있다면 좋아요 취소
+delete from good_table where id =1;
+-- 3.2. 3번 회원이 2번 회원이 작성한 댓글에 좋아요 클릭
+insert into good_table(comment_id , member_id)
+		values(1 , 7);
+-- 4. 댓글 조회시 좋아요 갯수도 함께 조회
+select c.* , count(g.comment_id) as '좋아요' from comment_table c ,good_table g 
+		where c.id = g.comment_id 
+			group by id ;
 
 
 

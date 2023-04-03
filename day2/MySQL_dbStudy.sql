@@ -945,17 +945,26 @@ create table good_table(
 );
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+-- 1. 회원가입
+insert into member_table(member_email , member_name , member_password) 
+		values('member_email0','member_name0','member_password0');
+-- 2. 이메일 중복체크 
+-- 기존 가입되어 있지 않은 이메일로 가입하려고 한다면
+select member_email from member_table where member_email = 'member_email7'; -- 멤버 컬럼에 없음
+-- 기존 가입된 이메일로 가입하려고 한다면
+select member_email from member_table where member_email = 'member_email0'; -- 멤버 컬럼에 있음
+-- 3. 로그인
+select * from member_table 
+		where member_email = 'member_email0' 
+			and member_password = 'member_password0';
+-- 4. 전체 회원 목록 조회 
+select * from member_table;
+-- 5. 특정 회원만 조회
+select * from member_table where member_email = 'member_email3';
+-- 6. 회원정보 수정화면 요청 
+select * from member_table where member_email = 'member_email3'; -- 특정 회원의 정보를 가져오고
+-- 7. 회원정보 수정 처리(비밀번호 변경)
+update member_table set member_password = '9999' where di = 5; -- 업데이트
+-- 8. 회원 삭제 또는 탈퇴 
+delete from member_table where id = 5;
 

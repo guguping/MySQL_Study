@@ -1006,21 +1006,23 @@ insert into board_table(board_title , board_writer , board_contents , member_id 
 insert into board_table(board_title , board_writer , board_contents , member_id , category_id)
 		values('안녕하세요' , '타우린' , '제곧내' , 7 , 2);
 -- 1.1. 게시글 작성(파일첨부 o)
-insert into board_file_table ( original_file_name , stored_file_name , board_id)
+insert into board_file_table 
+	( original_file_name , stored_file_name , board_id)
 		values('흠냐륑' , '77744477흠냐륑' , 1);
-insert into board_table(board_title , board_writer , board_contents , member_id , category_id , board_file_attached)
+insert into board_table
+	(board_title , board_writer , board_contents , member_id , category_id , board_file_attached)
 		values('흠냐륑' , '핫식스' , '제곧내' , 1 , 3 , 1);
 -- 2번 회원이 파일있는 자유게시판 글 2개 작성
 insert into board_file_table ( original_file_name , stored_file_name , board_id)
 		values('륑냐흠' , '45747444릥냐흠' , 7);
-insert into board_table(board_title , board_writer , board_contents , member_id , category_id , board_file_attached)
+insert into board_table
+	(board_title , board_writer , board_contents , member_id , category_id , board_file_attached)
 		values('륑냐흠' , '타우린' , '제곧내' , 7 , 1 , 5);
 insert into board_file_table ( original_file_name , stored_file_name , board_id)
 		values('얍엽욥' , '45747444얍' , 7);
-insert into board_table(board_title , board_writer , board_contents , member_id , category_id , board_file_attached)
+insert into board_table
+	(board_title , board_writer , board_contents , member_id , category_id , board_file_attached)
 		values('얍엽욥' , '타우린' , '제곧내' , 7 , 1 , 5);
--- 2. 게시글 목록 조회 
-select *from category_table;
 -- 2.1 전체글 목록 조회
 select *from board_table;
 -- 2.2 자유게시판 목록 조회 
@@ -1028,7 +1030,72 @@ select * from board_table where category_id = 1;
 -- 2.3 공지사항 목록 조회 
 select * from board_table where category_id = 3;
 -- 2.4 목록 조회시 카테고리 이름도 함께 나오게 조회
-select * from board_file_table;
 select b.* , c.category_name
 		from board_table b , category_table c
 			where b.category_id = c.id order by b.id asc;
+
+
+
+-- 3. 2번 게시글 조회 (조회수 처리 필요함)
+update board_table set board_hits = board_hits+1 where id=2;
+-- 단 , 이렇게 쿼리 업데이트로 조회수를 올리면 수정 시간을 now로 했기 때문에
+-- 조회수가 올라갈 때 마다 수정 시간이 바뀐다
+
+select * from board_table where id = 2;
+-- 3.1. 파일 첨부된 게시글 조회 (게시글 내용과 파일을 함께)
+update board_table set baord_hits = board_hits +1 where id=19;
+
+select b.*,f.original_file_name 
+	from board_table b ,board_file_table f 
+		where f.board_id = b.id and b.id = 19;
+-- 4. 1번 회원이 자유게시판에 첫번째로 작성한 게시글의 제목, 내용 수정
+update board_table set board_title = '맙소사 세상에' where id = 9;
+update board_table set board_contents = '곧제내' where id = 9;
+-- 한번에 가능하다
+update board_table set 
+		board_title = '맘소사 세상에' , board_contents = '곧내제' 
+			where id = 9;
+-- 5. 2번 회원이 자유게시판에 첫번째로 작성한 게시글 삭제 
+select * from board_table where member_id = 5;
+delete from board_table where id = 14;
+-- 7. 페이징 처리(한 페이지당 글 3개씩)
+select * from board_table order by id desc;
+-- 7.1. 첫번째 페이지
+select * from board_table order by id desc limit 0,3;
+-- 7.2. 두번째 페이지 
+select * from board_table order by id desc limit 3,3;
+-- 7.3. 세번째 페이지 
+select * from board_table order by id desc limit 6,3;
+-- 8. 검색(글제목 기준)
+select * from board_table where board_title = '흠냐륑';
+-- 8.1 검색결과를 오래된 순으로 조회 
+select * from board_table order by board_created_time asc;
+-- 8.2 검색결과를 조회수 내림차순으로 조회 
+select * from board_table order by board_hits desc;
+-- 8.3 검색결과 페이징 처리 
+select * from board_table where board_contents = '제곧내' order by board_created_time desc limit 0,3;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

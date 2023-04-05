@@ -1283,7 +1283,66 @@ END AS '성별',M_NO AS '후보번호' , CONCAT(LEFT(V_TIME,2),':',RIGHT(V_TIME,
 END AS '유권자확인'
 FROM TBL_VOTE_202005;
 SELECT * FROM VOTE_RESULT;
-          
+
+drop table if exists member_table2;
+
+create table member_table2(
+id varchar (10) unique primary key,
+member_password varchar(20) not null,
+member_name varchar (5) not null,
+member_birth date not null,
+member_gender varchar (3) not null,
+member_phone varchar (20) not null
+);
+
+drop table if exists board_table2;
+
+create table board_table2(
+bno bigint auto_increment primary key,
+board_writer varchar (10),
+board_title varchar (50) not null,
+board_contents varchar (500) not null,
+board_time datetime default now(),
+board_hits int,
+constraint fk_baord_table2 foreign key(board_writer)
+	references member_table2(id)
+);
+
+insert into member_table2 
+	values('id1','1111','홍길동','960101','남','010-1111-1111');
+insert into member_table2 
+	values('id2','2222','심청이','000101','여','010-2222-2222');
+                 
+select * from member_table2;
+
+insert into board_table2(board_writer , board_title , board_contents) 
+	values('id1','안녕하세요','신기하네요');
+insert into board_table2(board_writer , board_title , board_contents) 
+	values('id2','반갑습니다','소통해요!');
+                    
+select * from board_table2;
+                    
+update board_table2 set board_hits = +1 where bno=1;
+select * from board_table2 where bno = 1;
+                    
+select * from board_table2 order by board_time asc;
+
+select * from board_table2 order by board_hits desc;
+                    
+update board_table2 set board_title = '홍길동입니다' where bno = 1;
+
+delete from board_table2 where bno = 2;
+                    
+select * from board_table2;
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
                     
                     
                     

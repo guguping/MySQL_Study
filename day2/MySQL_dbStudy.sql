@@ -1302,7 +1302,6 @@ bno bigint auto_increment primary key,
 board_writer varchar (10),
 board_title varchar (50) not null,
 board_contents varchar (500) not null,
-board_time datetime default now(),
 board_hits int,
 constraint fk_baord_table2 foreign key(board_writer)
 	references member_table2(id)
@@ -1325,7 +1324,7 @@ select * from board_table2;
 update board_table2 set board_hits = +1 where bno=1;
 select * from board_table2 where bno = 1;
                     
-select * from board_table2 order by board_time asc;
+select * from board_table2 order by board_writer asc;
 
 select * from board_table2 order by board_hits desc;
                     
